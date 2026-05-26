@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDPS — Access Blocked</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #040810;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,23,68,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,23,68,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.container {
+  text-align: center;
+  padding: 40px;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+}
+.shield {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,23,68,0.5)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(255,23,68,0.8)); }
+}
+h1 {
+  font-size: 2em;
+  color: #ff1744;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.subtitle {
+  color: #7a9bbf;
+  font-size: 1em;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+.info-box {
+  background: rgba(255,23,68,0.08);
+  border: 1px solid rgba(255,23,68,0.3);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,23,68,0.1);
+  color: #cdd9e8;
+  font-size: 0.9em;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: #7a9bbf; font-size: 0.85em; }
+.info-value { color: #ff6b6b; font-family: monospace; }
+.badge {
+  background: rgba(255,23,68,0.2);
+  color: #ff1744;
+  border: 1px solid rgba(255,23,68,0.4);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.reason {
+  color: #cdd9e8;
+  font-size: 0.95em;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.footer {
+  color: #4a6a8a;
+  font-size: 0.8em;
+  margin-top: 20px;
+}
+.footer a {
+  color: #00e5ff;
+  text-decoration: none;
+}
+.go-back {
+  background: transparent;
+  border: 1px solid rgba(0,229,255,0.4);
+  color: #00e5ff;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+.go-back:hover { background: rgba(0,229,255,0.1); }
+.report {
+  background: transparent;
+  border: 1px solid rgba(255,23,68,0.4);
+  color: #ff6b6b;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.report:hover { background: rgba(255,23,68,0.1); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="shield">🛡️</div>
+  <div class="badge">⛔ ACCESS BLOCKED</div>
+  <h1>Threat Detected</h1>
+  <p class="subtitle">IDPS Security System — Prince Shri Venkateshwara Padmavathy Engineering College</p>
+
+  <div class="info-box">
+    <div class="info-row">
+      <span class="info-label">Blocked URL</span>
+      <span class="info-value" id="blocked-url">Malicious destination</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Your IP</span>
+      <span class="info-value" id="client-ip">192.168.50.2</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Threat Category</span>
+      <span class="info-value">Known Malicious Host</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Detection Engine</span>
+      <span class="info-value">Suricata + AbuseIPDB</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Time</span>
+      <span class="info-value" id="block-time">--</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Action Taken</span>
+      <span class="info-value" style="color:#ff1744">BLOCKED ✓</span>
+    </div>
+  </div>
+
+  <p class="reason">
+    This website has been identified as a known malicious host by the
+    IDPS security system. The destination IP address is listed in the
+    AbuseIPDB threat intelligence database with high confidence of abuse.
+    Access has been automatically blocked to protect your network.
+  </p>
+
+  <button class="go-back" onclick="history.back()">← Go Back</button>
+  <button class="report" onclick="window.location='http://192.168.50.1:5000'">View Dashboard</button>
+
+  <div class="footer">
+    Protected by IDPS — Low-Cost AI-Enhanced Intrusion Detection System<br>
+    <a href="http://192.168.50.1:5000">http://192.168.50.1:5000</a>
+  </div>
+</div>
+<script>
+  document.getElementById('blocked-url').textContent = document.referrer || window.location.href;
+  document.getElementById('block-time').textContent = new Date().toLocaleString('en-IN');
+</script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDPS — Threat Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #040810;
+  --bg2: #070d1a;
+  --bg3: #0a1628;
+  --panel: #0d1f35;
+  --panel2: #112240;
+  --border: #1a3a5c;
+  --border2: #0f2a45;
+  --cyan: #00e5ff;
+  --cyan2: #00b8d4;
+  --red: #ff1744;
+  --red2: #d50000;
+  --orange: #ff6d00;
+  --green: #00e676;
+  --yellow: #ffd600;
+  --text: #cdd9e8;
+  --text2: #7a9bbf;
+  --text3: #4a6a8a;
+  --mono: 'Share Tech Mono', monospace;
+  --head: 'Rajdhani', sans-serif;
+  --body: 'Exo 2', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Animated background grid ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(0,229,255,0.04) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(255,23,68,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Layout ── */
+.wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+/* ── Header ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(4,8,16,0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 0 20px;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  position: relative;
+}
+
+.logo-icon svg { width: 100%; height: 100%; }
+
+.logo-text {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 1.3em;
+  letter-spacing: 3px;
+  color: white;
+}
+
+.logo-sub {
+  font-family: var(--mono);
+  font-size: 0.6em;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  display: block;
+  margin-top: -4px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,230,118,0.1);
+  border: 1px solid rgba(0,230,118,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: var(--mono);
+  font-size: 0.75em;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0,230,118,0.4); }
+  50% { opacity:0.6; box-shadow: 0 0 0 6px rgba(0,230,118,0); }
+}
+
+.header-time {
+  font-family: var(--mono);
+  font-size: 0.75em;
+  color: var(--text3);
+}
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 20px 0 16px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+}
+
+.stat-card:hover {
+  border-color: var(--border);
+  transform: translateY(-2px);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.stat-card.c-red::before { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+.stat-card.c-cyan::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.stat-card.c-green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.stat-card.c-orange::before { background: linear-gradient(90deg, transparent, var(--orange), transparent); }
+
+.stat-icon {
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.stat-value {
+  font-family: var(--head);
+  font-size: 2.2em;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-card.c-red .stat-value { color: var(--red); }
+.stat-card.c-cyan .stat-value { color: var(--cyan); }
+.stat-card.c-green .stat-value { color: var(--green); }
+.stat-card.c-orange .stat-value { color: var(--orange); }
+
+.stat-label {
+  font-size: 0.72em;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-bg-icon {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: 3.5em;
+  opacity: 0.04;
+}
+
+/* ── Main content ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 14px;
+  padding-bottom: 30px;
+}
+
+@media (max-width: 900px) {
+  .content-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--panel2);
+}
+
+.panel-title {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 0.85em;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+.panel-count {
+  font-family: var(--mono);
+  font-size: 0.75em;
+  color: var(--text3);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* ── Alert list ── */
+.alert-list {
+  max-height: 520px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.alert-list::-webkit-scrollbar { width: 4px; }
+.alert-list::-webkit-scrollbar-track { background: var(--bg2); }
+.alert-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.alert-item {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--red);
+  animation: slideIn 0.3s ease;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.alert-item:hover { background: var(--bg3); border-color: var(--border); }
+.alert-item.sev-2 { border-left-color: var(--orange); }
+.alert-item.sev-3 { border-left-color: var(--cyan2); }
+
+@keyframes slideIn {
+  from { opacity:0; transform: translateX(-10px); }
+  to { opacity:1; transform: translateX(0); }
+}
+
+.alert-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.alert-sig {
+  font-family: var(--body);
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.65em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.badge-HIGH { background: rgba(255,23,68,0.2); color: var(--red); border: 1px solid rgba(255,23,68,0.3); }
+.badge-MED  { background: rgba(255,109,0,0.2); color: var(--orange); border: 1px solid rgba(255,109,0,0.3); }
+.badge-LOW  { background: rgba(0,229,255,0.15); color: var(--cyan); border: 1px solid rgba(0,229,255,0.25); }
+
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.alert-ips {
+  font-family: var(--mono);
+  font-size: 0.72em;
+  color: var(--cyan2);
+}
+
+.alert-arrow { color: var(--text3); margin: 0 3px; }
+
+.alert-time {
+  font-family: var(--mono);
+  font-size: 0.68em;
+  color: var(--text3);
+}
+
+.alert-cat {
+  font-size: 0.68em;
+  color: var(--text3);
+  background: var(--bg3);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.btn {
+  font-family: var(--head);
+  font-weight: 600;
+  font-size: 0.72em;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-block {
+  background: rgba(255,23,68,0.15);
+  color: var(--red);
+  border: 1px solid rgba(255,23,68,0.3);
+}
+.btn-block:hover { background: var(--red); color: white; }
+
+.btn-allow {
+  background: rgba(0,230,118,0.1);
+  color: var(--green);
+  border: 1px solid rgba(0,230,118,0.25);
+}
+.btn-allow:hover { background: var(--green); color: var(--bg); }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-blocked {
+  background: rgba(255, 23, 68, 0.25);
+  color: var(--red);
+  border: 1px solid rgba(255, 23, 68, 0.4);
+  opacity: 1 !important;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+}
+
+.empty-state .icon { font-size: 3em; margin-bottom: 16px; opacity: 0.5; }
+.empty-state p { font-size: 0.85em; line-height: 1.6; font-family: var(--mono); }
+
+/* ── Side panel ── */
+.side-panels { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── System status ── */
+.status-list { padding: 10px; }
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 0.82em;
+}
+
+.status-row:last-child { border-bottom: none; }
+
+.status-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text2);
+  font-family: var(--body);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-indicator.on { background: var(--green); box-shadow: 0 0 6px var(--green); animation: livePulse 2s infinite; }
+.status-indicator.off { background: var(--red); }
+.status-indicator.warn { background: var(--orange); }
+
+.status-val {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--text3);
+}
+
+/* ── Threat breakdown ── */
+.threat-list { padding: 12px; }
+
+.threat-row {
+  margin-bottom: 12px;
+}
+
+.threat-row-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 0.78em;
+}
+
+.threat-name { color: var(--text2); font-weight: 600; }
+.threat-count { font-family: var(--mono); color: var(--text3); }
+
+.threat-bar-bg {
+  height: 4px;
+  background: var(--bg2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.threat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+/* ── Scan terminal ── */
+.terminal {
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 0.73em;
+  line-height: 1.8;
+  color: var(--text3);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.terminal::-webkit-scrollbar { width: 3px; }
+.terminal::-webkit-scrollbar-thumb { background: var(--border); }
+
+.terminal .t-line { display: block; }
+.terminal .t-cyan { color: var(--cyan); }
+.terminal .t-green { color: var(--green); }
+.terminal .t-red { color: var(--red); }
+.terminal .t-orange { color: var(--orange); }
+.terminal .t-dim { color: var(--text3); }
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 12px;
+  background: var(--cyan);
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── Tooltip ── */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.65em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(0,229,255,0.1);
+  color: var(--cyan2);
+  border: 1px solid rgba(0,229,255,0.2);
+}
+
+/* ── Scrollbar global ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 36 36" fill="none">
+          <polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="none" stroke="#00e5ff" stroke-width="1.5" opacity="0.6"/>
+          <polygon points="18,7 29,13 29,23 18,29 7,23 7,13" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
+          <circle cx="18" cy="18" r="5" fill="#00e5ff" opacity="0.9"/>
+          <circle cx="18" cy="18" r="8" fill="none" stroke="#00e5ff" stroke-width="0.5" opacity="0.3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">IDPS</div>
+        <span class="logo-sub">THREAT CONTROL CENTER</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <div class="header-time" id="clock">--:--:--</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrapper">
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card c-red">
+      <div class="stat-icon">🚨</div>
+      <div class="stat-value" id="total-alerts">0</div>
+      <div class="stat-label">Total Alerts</div>
+      <div class="stat-bg-icon">⚠</div>
+    </div>
+    <div class="stat-card c-cyan">
+      <div class="stat-icon">🛡</div>
+      <div class="stat-value" id="blocked-ips">0</div>
+      <div class="stat-label">Blocked IPs</div>
+      <div class="stat-bg-icon">⛔</div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-icon">⚙️</div>
+      <div class="stat-value" id="suricata-status" style="font-size:1.2em">—</div>
+      <div class="stat-label">Suricata Engine</div>
+      <div class="stat-bg-icon">◉</div>
+    </div>
+    <div class="stat-card c-orange">
+      <div class="stat-icon">⏱</div>
+      <div class="stat-value" id="uptime" style="font-size:1em; padding-top:6px">—</div>
+      <div class="stat-label">System Uptime</div>
+      <div class="stat-bg-icon">↺</div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="content-grid">
+
+    <!-- Alert feed -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-dot"></div>
+          Live Threat Feed
+        </div>
+        <span class="panel-count" id="feed-count">0 events</span>
+      </div>
+      <div class="alert-list" id="alert-list">
+        <div class="empty-state">
+          <div class="icon">📡</div>
+          <p>Monitoring network traffic...<br>Alerts will appear here in real time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side panels -->
+    <div class="side-panels">
+
+      <!-- System status -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">System Status</div>
+        </div>
+        <div class="status-list">
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on" id="ind-suricata"></div>
+              Suricata IPS
+            </div>
+            <span class="status-val" id="s-suricata">checking...</span>
+          </div>
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on"></div>
+              Decision Engine
+            </div>
+            <span class="status-val tag">ACTIVE</span>
+          </div>
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on"></div>
+              ML Model
+            </div>
+            <span class="status-val tag">99.80% ACC</span>
+          </div>
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on"></div>
+              nftables Firewall
+            </div>
+            <span class="status-val tag">ACTIVE</span>
+          </div>
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on"></div>
+              Threat Intel
+            </div>
+            <span class="status-val tag">500 IPs</span>
+          </div>
+          <div class="status-row">
+            <div class="status-name">
+              <div class="status-indicator on"></div>
+              AbuseIPDB Feed
+            </div>
+            <span class="status-val">Daily sync</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threat breakdown -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Threat Breakdown</div>
+        </div>
+        <div class="threat-list" id="threat-breakdown">
+          <div class="threat-row">
+            <div class="threat-row-top">
+              <span class="threat-name">Network Trojan</span>
+              <span class="threat-count" id="cnt-trojan">0</span>
+            </div>
+            <div class="threat-bar-bg">
+              <div class="threat-bar-fill" id="bar-trojan" style="width:0%;background:var(--red)"></div>
+            </div>
+          </div>
+          <div class="threat-row">
+            <div class="threat-row-top">
+              <span class="threat-name">Bad Traffic</span>
+              <span class="threat-count" id="cnt-bad">0</span>
+            </div>
+            <div class="threat-bar-bg">
+              <div class="threat-bar-fill" id="bar-bad" style="width:0%;background:var(--orange)"></div>
+            </div>
+          </div>
+          <div class="threat-row">
+            <div class="threat-row-top">
+              <span class="threat-name">Port Scan</span>
+              <span class="threat-count" id="cnt-scan">0</span>
+            </div>
+            <div class="threat-bar-bg">
+              <div class="threat-bar-fill" id="bar-scan" style="width:0%;background:var(--cyan)"></div>
+            </div>
+          </div>
+          <div class="threat-row">
+            <div class="threat-row-top">
+              <span class="threat-name">DoS / DDoS</span>
+              <span class="threat-count" id="cnt-dos">0</span>
+            </div>
+            <div class="threat-bar-bg">
+              <div class="threat-bar-fill" id="bar-dos" style="width:0%;background:var(--yellow)"></div>
+            </div>
+          </div>
+          <div class="threat-row">
+            <div class="threat-row-top">
+              <span class="threat-name">Other</span>
+              <span class="threat-count" id="cnt-other">0</span>
+            </div>
+            <div class="threat-bar-bg">
+              <div class="threat-bar-fill" id="bar-other" style="width:0%;background:var(--text3)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal log -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">System Log</div>
+        </div>
+        <div class="terminal" id="terminal">
+          <span class="t-line t-cyan">[ IDPS ] Initializing threat control center...</span>
+          <span class="t-line t-green">[ OK   ] Suricata engine loaded</span>
+          <span class="t-line t-green">[ OK   ] ML model loaded (99.80% accuracy)</span>
+          <span class="t-line t-green">[ OK   ] nftables rules applied</span>
+          <span class="t-line t-green">[ OK   ] AbuseIPDB sync complete</span>
+          <span class="t-line t-cyan">[ IDPS ] Monitoring traffic on usb0/eth0</span>
+          <span class="t-line">&gt; <span class="cursor"></span></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Clock ──────────────────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-IN', {hour12:false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Threat counters ────────────────────────────────────────────────────────
+const threatCounts = { trojan:0, bad:0, scan:0, dos:0, other:0 };
+
+function categorizeThreat(sig) {
+  const s = sig.toLowerCase();
+  if (s.includes('trojan') || s.includes('blacksun') || s.includes('malware') || s.includes('bot')) return 'trojan';
+  if (s.includes('scan') || s.includes('nmap') || s.includes('probe')) return 'scan';
+  if (s.includes('dos') || s.includes('ddos') || s.includes('flood')) return 'dos';
+  if (s.includes('bad') || s.includes('attack_response') || s.includes('suspicious')) return 'bad';
+  return 'other';
+}
+
+function updateBars() {
+  const total = Math.max(1, Object.values(threatCounts).reduce((a,b)=>a+b,0));
+  const keys = ['trojan','bad','scan','dos','other'];
+  keys.forEach(k => {
+    const pct = (threatCounts[k]/total*100).toFixed(1);
+    document.getElementById('cnt-'+k).textContent = threatCounts[k];
+    document.getElementById('bar-'+k).style.width = pct + '%';
+  });
+}
+
+// ── Terminal log ───────────────────────────────────────────────────────────
+function termLog(msg, type='dim') {
+  const term = document.getElementById('terminal');
+  const cursor = term.querySelector('.t-line:last-child');
+  const line = document.createElement('span');
+  line.className = `t-line t-${type}`;
+  line.textContent = msg;
+  if (cursor) term.insertBefore(line, cursor);
+  else term.appendChild(line);
+  term.scrollTop = term.scrollHeight;
+}
+
+// ── Add alert to feed ──────────────────────────────────────────────────────
+let alertCount = 0;
+
+function addAlert(alert) {
+  const list = document.getElementById('alert-list');
+  const empty = list.querySelector('.empty-state');
+  if (empty) empty.remove();
+
+  alertCount++;
+  document.getElementById('feed-count').textContent = alertCount + ' event' + (alertCount!==1?'s':'');
+
+  const sev = alert.severity || 3;
+  const sevLabel = sev===1?'HIGH': sev===2?'MED':'LOW';
+  const timeStr = alert.timestamp ? alert.timestamp.split('T')[1]?.split('+')[0]?.split('.')[0] || '' : '';
+  const cat = alert.category || 'Unknown';
+
+  const div = document.createElement('div');
+  div.className = `alert-item sev-${sev}`;
+  div.innerHTML = `
+    <div class="alert-top">
+      <div class="alert-sig">${escHtml(alert.signature)}</div>
+      <span class="badge badge-${sevLabel}">${sevLabel}</span>
+    </div>
+    <div class="alert-meta">
+      <span class="alert-ips">
+        <span style="color:var(--red)">${escHtml(alert.src_ip||'?')}</span>
+        <span class="alert-arrow">→</span>
+        <span>${escHtml(alert.dest_ip||'?')}</span>
+      </span>
+      <span class="alert-time">${timeStr}</span>
+      <span class="alert-cat">${escHtml(cat)}</span>
+    </div>
+    <div class="alert-actions">
+      <button class="btn btn-block" onclick="doBlock('${escHtml(alert.src_ip||'')}', this)">⛔ Block IP</button>
+      <button class="btn btn-allow" onclick="doAllow('${escHtml(alert.src_ip||'')}', this)">✓ Allow</button>
+    </div>
+  `;
+
+  list.insertBefore(div, list.firstChild);
+  while (list.children.length > 60) list.removeChild(list.lastChild);
+
+  // Update threat breakdown
+  const cat2 = categorizeThreat(alert.signature);
+  threatCounts[cat2]++;
+  updateBars();
+
+  // Terminal log
+  termLog(`[ ALERT ] ${alert.src_ip} → ${alert.signature.substring(0,45)}...`, 'red');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Block / Allow ──────────────────────────────────────────────────────────
+function doBlock(ip, btn) {
+  if (!ip) return;
+
+  fetch('/api/block', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ ip })
+  })
+  .then(r => r.json())
+  .then(() => {
+    // Update block button
+    btn.textContent = '✓ Blocked';
+    btn.disabled = true;
+    btn.classList.add('btn-blocked');
+
+    // Remove the Allow button
+    const actions = btn.parentElement;
+    const allowBtn = actions.querySelector('.btn-allow');
+    if (allowBtn) {
+      allowBtn.remove();
+    }
+
+    termLog(`[ BLOCK ] ${ip} added to nftables blocklist`, 'orange');
+    loadStats();
+  })
+  .catch(() => {
+    btn.textContent = 'Error';
+  });
+}
+
+function doAllow(ip, btn) {
+  if (!ip) return;
+  fetch('/api/unblock', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ip})
+  }).then(r=>r.json()).then(()=>{
+    btn.textContent = '✓ Allowed';
+    btn.disabled = true;
+    termLog(`[ ALLOW ] ${ip} removed from blocklist`, 'green');
+  }).catch(()=>{ btn.textContent = 'Error'; });
+}
+
+// ── Load stats ─────────────────────────────────────────────────────────────
+function loadStats() {
+  fetch('/api/stats').then(r=>r.json()).then(data => {
+    document.getElementById('total-alerts').textContent = data.total_alerts || 0;
+    document.getElementById('blocked-ips').textContent = data.blocked_ips || 0;
+    const status = data.suricata_status || 'Unknown';
+    const el = document.getElementById('suricata-status');
+    el.textContent = status;
+    el.style.color = status === 'Running' ? 'var(--green)' : 'var(--red)';
+    document.getElementById('s-suricata').textContent = status;
+    const ind = document.getElementById('ind-suricata');
+    ind.className = 'status-indicator ' + (status==='Running'?'on':'off');
+    document.getElementById('uptime').textContent = (data.uptime||'').replace('up ','');
+  }).catch(()=>{});
+}
+
+// ── Load existing alerts ───────────────────────────────────────────────────
+function loadAlerts() {
+  fetch('/api/alerts').then(r=>r.json()).then(alerts => {
+    if (alerts && alerts.length > 0) {
+      [...alerts].reverse().forEach(a => addAlert(a));
+    }
+  }).catch(()=>{});
+}
+
+// ── SSE live stream ────────────────────────────────────────────────────────
+const evtSource = new EventSource('/stream');
+evtSource.onmessage = function(e) {
+  try {
+    const alert = JSON.parse(e.data);
+    addAlert(alert);
+    loadStats();
+  } catch(err) {}
+};
+evtSource.onerror = function() {
+  termLog('[ WARN ] Stream connection interrupted, retrying...', 'orange');
+};
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadStats();
+loadAlerts();
+setInterval(loadStats, 15000);
+</script>
+</body>
+</html>

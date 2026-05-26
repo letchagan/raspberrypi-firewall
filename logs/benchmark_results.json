@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-03-19 14:06:31.454836",
+  "tests": [
+    {
+      "test": "Malicious User Agent (BlackSun)",
+      "trials": 5,
+      "detected": 0,
+      "detection_rate": 0.0,
+      "avg_response_ms": 0,
+      "min_response_ms": 0,
+      "max_response_ms": 0
+    },
+    {
+      "test": "Attack Response Detection",
+      "trials": 5,
+      "detected": 0,
+      "detection_rate": 0.0,
+      "avg_response_ms": 0,
+      "min_response_ms": 0,
+      "max_response_ms": 0
+    },
+    {
+      "test": "Port Scan Detection (Nmap)",
+      "trials": 5,
+      "detected": 0,
+      "detection_rate": 0.0,
+      "avg_response_ms": 0,
+      "min_response_ms": 0,
+      "max_response_ms": 0
+    }
+  ],
+  "summary": {
+    "avg_latency_ms": 35.9,
+    "false_positive_rate": 0.0,
+    "total_normal_requests": 20,
+    "false_alerts": 0,
+    "avg_detection_rate": 0.0,
+    "avg_response_ms": 0.0
+  }
+}
