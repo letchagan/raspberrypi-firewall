@@ -5,10 +5,18 @@ import json
 import time
 import os
 import subprocess
+import ipaddress
 from datetime import datetime
 import threading
 
 app = Flask(__name__)
+
+def is_valid_ip(ip):
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
 CORS(app)
 
 EVE_LOG = '/var/log/suricata/eve.json'
@@ -94,8 +102,8 @@ def get_stats():
 def block_ip():
     data = request.json
     ip = data.get('ip')
-    if ip:
-        os.system(f'nft add element ip blocklist blocked_ips "{{ {ip} }}"')
+    if ip and is_valid_ip(ip):
+        subprocess.run(["nft", "add", "element", "ip", "blocklist", "blocked_ips", f"{{ {ip} }}"], check=False)
         return jsonify({'status': 'blocked', 'ip': ip})
     return jsonify({'status': 'error'})
 
@@ -107,8 +115,8 @@ def blocked():
 def unblock_ip():
     data = request.json
     ip = data.get('ip')
-    if ip:
-        os.system(f'nft delete element ip blocklist blocked_ips "{{ {ip} }}"')
+    if ip and is_valid_ip(ip):
+        subprocess.run(["nft", "delete", "element", "ip", "blocklist", "blocked_ips", f"{{ {ip} }}"], check=False)
         return jsonify({'status': 'unblocked', 'ip': ip})
     return jsonify({'status': 'error'})
 
