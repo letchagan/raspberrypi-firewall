@@ -30,7 +30,7 @@ def get_blocked_count():
 def measure_response_time(attack_cmd):
     before = get_alert_count()
     start = time.time()
-    os.system(attack_cmd + ' > /dev/null 2>&1')
+    subprocess.run(attack_cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Wait for Suricata to process
     for _ in range(30):
         time.sleep(0.1)
@@ -126,7 +126,7 @@ def measure_false_positives():
 
     while time.time() - start < 30:
         for cmd in normal_cmds:
-            os.system(cmd + ' 2>/dev/null')
+            subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL)
             total_requests += 1
             time.sleep(0.5)
 

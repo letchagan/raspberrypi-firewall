@@ -4,6 +4,7 @@ import os
 import logging
 from datetime import datetime
 import subprocess
+import ipaddress
 
 # Setup logging
 logging.basicConfig(
@@ -26,6 +27,14 @@ def block_ip(ip, reason):
     if ip in BLOCKED_IPS:
         return
 
+    # Validate IP address
+    try:
+        ipaddress.ip_address(ip)
+    except ValueError:
+        print(f"[INVALID IP] Skipping invalid IP: {ip}")
+        logging.warning(f"INVALID IP: {ip} — not blocked")
+        return
+
     # Skip trusted IPs
     if ip in WHITELIST_IPS:
         print(f"[WHITELIST] Skipping trusted IP: {ip}")
@@ -37,7 +46,7 @@ def block_ip(ip, reason):
         return
 
     print(f"[{datetime.now()}] BLOCKING: {ip} — {reason}")
-    os.system(f'nft add element ip blocklist blocked_ips "{{ {ip} }}"')
+    subprocess.run(["nft", "add", "element", "ip", "blocklist", "blocked_ips", f"{{ {ip} }}"], check=False)
     BLOCKED_IPS.add(ip)
 
     logging.info(f"BLOCKED: {ip} — {reason}")
