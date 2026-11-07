@@ -135,39 +135,68 @@ Python packages:
 pip install flask flask-cors requests numpy matplotlib
 ```
 
-## 📥 Installation
+## 📥 Quick Start
 
-### 1. Clone the repository
+### Prerequisites
+
+- Raspberry Pi with Raspberry Pi OS
+- Two network interfaces (WAN: wlan0, LAN: eth0)
+- Python 3, Suricata, nftables installed
+- Root/sudo access
+
+### Installation
+
+**For detailed installation and deployment instructions, see [INSTALL.md](INSTALL.md)**
 
 ```bash
+# 1. Clone and setup
 git clone https://github.com/letchagan/raspberrypi-firewall.git
 cd raspberrypi-firewall
-```
 
-### 2. Create a virtual environment
-
-```bash
+# 2. Create virtual environment and install dependencies
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Configure environment
+cp .env.example .env
+nano .env  # Edit with your settings
+
+# 4. Run gateway setup
+sudo bash setup_gateway.sh
+sudo bash setup_redirect.sh
+
+# 5. Start the system
+sudo bash start_idps.sh
 ```
 
-### 3. Install Python dependencies
+Access the dashboard at: **http://192.168.50.1:3000**
+
+## 🔐 Configuration & Security
+
+### Environment Configuration
+
+All configuration is managed via `.env` file and `config.py`. See [.env.example](.env.example) for all available options.
 
 ```bash
-pip install flask flask-cors requests numpy matplotlib
+# Copy example configuration
+cp .env.example .env
+nano .env  # Edit with your values
 ```
 
-## 🔐 Configure AbuseIPDB
+**Important:** Never commit `.env` file with real credentials to version control.
 
-Create a `.env` file:
+### Security Features (v2.0.0+)
 
-```env
-ABUSEIPDB_API_KEY=your_api_key_here
-```
+✅ **Command Injection Prevention** - Safe subprocess usage  
+✅ **Input Validation** - IP address validation  
+✅ **API Authentication** - Optional token-based auth  
+✅ **Rate Limiting** - Protection against brute-force attacks  
+✅ **Thread Safety** - Safe concurrent access  
+✅ **Graceful Shutdown** - Signal handlers for clean stops  
+✅ **Comprehensive Logging** - Audit trail of all actions  
 
-**Never expose a real API key in a public repository.**
-
-The threat-intelligence module uses the AbuseIPDB blacklist endpoint and currently requests malicious IPs with a confidence threshold of 85%.
+For detailed security information, see [SECURITY.md](SECURITY.md)
 
 ## 🌐 Network Configuration
 
@@ -538,52 +567,112 @@ These values may need to be changed for another Raspberry Pi/network.
 
 The dashboard also contains privileged firewall operations, so it should not be exposed directly to an untrusted network.
 
+## 📚 Documentation
+
+- **[IMPROVEMENTS.md](IMPROVEMENTS.md)** - What's new in v2.0.0 (24 major improvements)
+- **[INSTALL.md](INSTALL.md)** - Complete installation and deployment guide
+- **[SECURITY.md](SECURITY.md)** - Security hardening and best practices
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development setup and contribution guide
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and improvements
+
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+# Install dev dependencies
+pip install pytest pytest-cov
+
+# Run tests
+pytest
+pytest --cov=.  # With coverage
+```
+
+Or use the Makefile:
+
+```bash
+make test
+make test-coverage
+```
+
+## 🛠️ Development
+
+For development setup and guidelines, see [DEVELOPMENT.md](DEVELOPMENT.md)
+
+```bash
+# Setup development environment
+make dev
+
+# Run linting and formatting
+make lint
+make format
+
+# Run tests
+make test
+```
+
+## 📊 v2.0.0 Major Improvements
+
+### Security (🔒)
+- ✅ Command injection prevention
+- ✅ Input validation and sanitization
+- ✅ API authentication support
+- ✅ Rate limiting on endpoints
+- ✅ Secure configuration management
+
+### Code Quality (📋)
+- ✅ Centralized config system
+- ✅ Comprehensive logging
+- ✅ Thread-safe data structures
+- ✅ Graceful shutdown handling
+- ✅ Proper error responses
+
+### DevOps (🚀)
+- ✅ Systemd service files
+- ✅ Environment-based configuration
+- ✅ Health check endpoint
+- ✅ Makefile for common tasks
+- ✅ Production-ready deployment
+
+### Documentation (📚)
+- ✅ Installation guide
+- ✅ Security guide
+- ✅ Development guide
+- ✅ Changelog
+- ✅ Comprehensive docstrings
+
+### Testing (🧪)
+- ✅ Unit tests with pytest
+- ✅ API endpoint tests
+- ✅ Validation tests
+- ✅ Rate limit tests
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+
 ## 🛠️ Future Improvements
 
-Potential improvements include:
-
-- [ ] Add authentication to the dashboard
-- [ ] Add HTTPS support
-- [ ] Add configurable firewall rules
-- [ ] Add persistent nftables configuration
-- [ ] Add systemd services
-- [ ] Add Docker deployment option
+- [ ] Add HTTPS support to Flask dashboard
+- [ ] Implement OAuth2 authentication
 - [ ] Add database-backed alert history
 - [ ] Add IP reputation scoring
-- [ ] Add configurable severity thresholds
-- [ ] Add email/Telegram security alerts
-- [ ] Add automated unit tests
-- [ ] Add Docker/CI testing
+- [ ] Add email/Telegram alerts
 - [ ] Improve IPv6 support
-- [ ] Add role-based dashboard access
-- [ ] Make all paths and interfaces configurable
+- [ ] Add role-based access control
+- [ ] Docker deployment option
+- [ ] Web Application Firewall (WAF)
+- [ ] Automated security scanning
 
 ## 🤝 Contributing
 
-Contributions are welcome.
+Contributions are welcome! Please see [DEVELOPMENT.md](DEVELOPMENT.md) for guidelines.
 
-1. Fork the repository.
-2. Create a feature branch:
-
-```bash
-git checkout -b feature/my-feature
-```
-
-3. Make your changes.
-4. Test the changes on an isolated network.
-5. Commit:
-
-```bash
-git commit -m "feat: add my feature"
-```
-
-6. Push:
-
-```bash
-git push origin feature/my-feature
-```
-
-7. Open a Pull Request.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes and add tests
+4. Run linting: `make lint`
+5. Commit: `git commit -m "feat: add my feature"`
+6. Push: `git push origin feature/my-feature`
+7. Open a Pull Request
 
 ## ⚖️ License
 

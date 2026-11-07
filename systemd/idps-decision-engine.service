@@ -1,0 +1,19 @@
+[Unit]
+Description=IDPS Decision Engine - Suricata Alert Processor
+After=network.target suricata.service
+Wants=suricata.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/idps
+EnvironmentFile=/home/pi/idps/.env
+ExecStart=/usr/bin/python3 /home/pi/idps/decision_engine.py
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=idps-decision-engine
+
+[Install]
+WantedBy=multi-user.target

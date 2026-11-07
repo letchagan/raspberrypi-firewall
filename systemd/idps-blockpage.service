@@ -1,0 +1,19 @@
+[Unit]
+Description=IDPS Block Page Server
+After=network.target
+PartOf=idps.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/idps
+EnvironmentFile=/home/pi/idps/.env
+ExecStart=/usr/bin/python3 /home/pi/idps/blockpage_server.py
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=idps-blockpage
+
+[Install]
+WantedBy=multi-user.target
