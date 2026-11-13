@@ -1,0 +1,7 @@
+[Unit]
+Description=Intrusion Detection and Prevention System
+Documentation=file:///home/pi/idps/README.md
+Wants=idps-decision-engine.service idps-blockpage.service idps-dashboard.service
+
+[Install]
+WantedBy=multi-user.target

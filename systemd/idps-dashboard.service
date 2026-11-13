@@ -1,0 +1,20 @@
+[Unit]
+Description=IDPS Dashboard - Flask Web Application
+After=network.target
+PartOf=idps.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/idps
+EnvironmentFile=/home/pi/idps/.env
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/usr/bin/python3 /home/pi/idps/app.py
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=idps-dashboard
+
+[Install]
+WantedBy=multi-user.target
